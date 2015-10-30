@@ -1,0 +1,185 @@
+﻿using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
+using Windows.Media.Capture;
+using Windows.Media.MediaProperties;
+using Windows.Storage;
+
+namespace Microsoft.Maker.Devices.Media.UsbCamera
+{
+    public class UsbCamera
+    {
+        /// <summary>
+        /// Media Capture object for the USB camera
+        /// </summary>
+        private MediaCapture mediaCapture;
+
+        /// <summary>
+        /// Control Flag
+        /// </summary>
+        private bool initialized = false;
+
+        /// <summary>
+        /// Asynchronously initializes webcam feed
+        /// </summary>
+        /// <returns>
+        /// Task object.
+        /// </returns>
+        public async Task InitializeCameraAsync()
+        {
+            if (mediaCapture == null)
+            {
+                // Attempt to get attached webcam
+                var cameraDevice = await FindCameraDevice();
+
+                if (cameraDevice == null)
+                {
+                    // No camera found, report the error and break out of initialization
+                    Debug.WriteLine("No camera found!");
+                    initialized = false;
+                    return;
+                }
+
+                // Creates MediaCapture initialization settings with foudnd webcam device
+                var settings = new MediaCaptureInitializationSettings { VideoDeviceId = cameraDevice.Id };
+
+                mediaCapture = new MediaCapture();
+                try
+                {
+                    await mediaCapture.InitializeAsync(settings);
+                    initialized = true;
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Debug.WriteLine("UnauthorizedAccessException: " + ex.ToString());
+                    Debug.WriteLine("Ensure webcam capability is added in the manifest.");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Exception when initializing MediaCapture:" + ex.ToString());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously begins live webcam feed
+        /// </summary>
+        /// <returns>
+        /// Task object.
+        /// </returns>
+        public async Task StartCameraPreview()
+        {
+            try
+            {
+                await mediaCapture.StartPreviewAsync();
+            }
+            catch
+            {
+                initialized = false;
+                Debug.WriteLine("Failed to start camera preview stream");
+
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously captures photo from camera feed and stores it in local storage. Returns image file as a StorageFile.
+        /// File is stored in a temporary folder and could be deleted by the system at any time.
+        /// </summary>
+        /// <returns>
+        /// Task object: Storage file with captured image.
+        /// </returns>
+        public async Task<StorageFile> CapturePhoto()
+        {
+            StorageFile file;
+
+            // Create storage file in local app storage
+
+            string fileName = GenerateNewFileName() + ".jpg";
+            CreationCollisionOption collisionOption = CreationCollisionOption.GenerateUniqueName;
+
+            file = await ApplicationData.Current.TemporaryFolder.CreateFileAsync(fileName, collisionOption);
+
+            // Captures and stores new Jpeg image file
+            await mediaCapture.CapturePhotoToStorageFileAsync(ImageEncodingProperties.CreateJpeg(), file);
+
+            // Return image file
+            return file;
+        }
+
+        /// <summary>
+        /// Returns true if webcam has been successfully initialized. Otherwise, returns false.
+        /// </summary>
+        /// <returns>
+        /// Returns true if camera is initialized; false otherwise.
+        /// </returns>
+        public bool IsInitialized()
+        {
+            return initialized;
+        }
+
+        /// <summary>
+        /// Asynchronously ends live webcam feed
+        /// </summary>
+        /// <returns>
+        /// Task object.
+        /// </returns>
+        public async Task StopCameraPreview()
+        {
+            try
+            {
+                await mediaCapture.StopPreviewAsync();
+            }
+            catch
+            {
+                Debug.WriteLine("Failed to stop camera preview stream");
+            }
+        }
+
+        /// <summary>
+        /// Performs tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            mediaCapture?.Dispose();
+            initialized = false;
+        }
+
+        /// <summary>
+        /// Asynchronously looks for and returns first camera device found.
+        /// If no device is found, return null
+        /// </summary>
+        /// <returns>
+        /// Task object: Device information of the first detected camera device.
+        /// </returns>
+        private static async Task<DeviceInformation> FindCameraDevice()
+        {
+            // Get available devices for capturing pictures
+            var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+
+
+            if (allVideoDevices.Count > 0)
+            {
+                // If there is a device attached, return the first device found
+                return allVideoDevices[0];
+            }
+            else
+            {
+                // Else, return null
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Generates unique file name based on current time and date. Returns value as string.
+        /// </summary>
+        /// <returns>
+        /// Unique file name string.
+        /// </returns>
+        private string GenerateNewFileName()
+        {
+            return "IMG_" + DateTime.UtcNow.ToString("yyyy-MMM-dd_HH-mm-ss");
+        }
+    }
+}
+
