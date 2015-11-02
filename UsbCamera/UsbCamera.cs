@@ -18,15 +18,23 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
         /// <summary>
         /// Control Flag
         /// </summary>
-        private bool initialized = false;
+        private bool isInitialized = false;
+
+        /// <summary>
+        /// Gets the MediaCapture object for the USB camera 
+        /// </summary>
+        public MediaCapture getMediaCapture
+        {
+            get { return mediaCapture; }
+        }
 
         /// <summary>
         /// Asynchronously initializes webcam feed
         /// </summary>
         /// <returns>
-        /// Task object.
+        /// Task object: True if camera is successfully initialized; false otherwise.
         /// </returns>
-        public async Task InitializeCameraAsync()
+        public async Task<bool> InitializeCameraAsync()
         {
             if (mediaCapture == null)
             {
@@ -36,9 +44,9 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
                 if (cameraDevice == null)
                 {
                     // No camera found, report the error and break out of initialization
-                    Debug.WriteLine("No camera found!");
-                    initialized = false;
-                    return;
+                    Debug.WriteLine("UsbCamera: No camera found!");
+                    isInitialized = false;
+                    return false;
                 }
 
                 // Creates MediaCapture initialization settings with foudnd webcam device
@@ -48,18 +56,19 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
                 try
                 {
                     await mediaCapture.InitializeAsync(settings);
-                    initialized = true;
+                    isInitialized = true;
+                    return true;
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    Debug.WriteLine("UnauthorizedAccessException: " + ex.ToString());
-                    Debug.WriteLine("Ensure webcam capability is added in the manifest.");
+                    Debug.WriteLine("UsbCamera: UnauthorizedAccessException: " + ex.ToString() + "Ensure webcam capability is added in the manifest.");
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine("Exception when initializing MediaCapture:" + ex.ToString());
+                    Debug.WriteLine("UsbCamera: Exception when initializing MediaCapture:" + ex.ToString());
                 }
             }
+            return false;
         }
 
         /// <summary>
@@ -76,8 +85,8 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
             }
             catch
             {
-                initialized = false;
-                Debug.WriteLine("Failed to start camera preview stream");
+                isInitialized = false;
+                Debug.WriteLine("UsbCamera: Failed to start camera preview stream");
 
             }
         }
@@ -115,7 +124,7 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
         /// </returns>
         public bool IsInitialized()
         {
-            return initialized;
+            return isInitialized;
         }
 
         /// <summary>
@@ -132,7 +141,7 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
             }
             catch
             {
-                Debug.WriteLine("Failed to stop camera preview stream");
+                Debug.WriteLine("UsbCamera: Failed to stop camera preview stream");
             }
         }
 
@@ -142,7 +151,7 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
         public void Dispose()
         {
             mediaCapture?.Dispose();
-            initialized = false;
+            isInitialized = false;
         }
 
         /// <summary>
@@ -173,12 +182,15 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
         /// <summary>
         /// Generates unique file name based on current time and date. Returns value as string.
         /// </summary>
+        /// <param name = "prefix">
+        /// Prefix for image name. Default value = "IMG".
+        /// </param>
         /// <returns>
         /// Unique file name string.
         /// </returns>
-        private string GenerateNewFileName()
+        private string GenerateNewFileName(string prefix = "IMG")
         {
-            return "IMG_" + DateTime.UtcNow.ToString("yyyy-MMM-dd_HH-mm-ss");
+            return prefix + "_" + DateTime.UtcNow.ToString("yyyy-MMM-dd_HH-mm-ss");
         }
     }
 }
