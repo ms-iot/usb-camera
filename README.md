@@ -14,8 +14,8 @@ To use this block in your project, you need to perform the following steps:
 
 1. Navigate to your git project folder using Command Prompt and run `git submodule add https://github.com/ms-iot/usb-camera`
 2. Next, run `git submodule update`
-3. Open your project solution on Visual Studio and right click on Solution -> Add -> Existing Project. Select UsbCamera.
-4. Once UsbCamera is added to the solution explorer, right click on References on your project -> Add Reference -> Projects -> Solution. Check UsbCamera and select OK.
+3. Open your project solution on Visual Studio and right click on Solution -> Add -> Existing Project. Select usb-camera -> UsbCamera -> UsbCamera.csproj.
+4. Once usb-camera is added to the solution explorer, right click on References on your project -> Add Reference -> Projects -> Solution. Check UsbCamera and select OK.
 5. You should now be able to use UsbCamera objects in your project.
 
 Note: Everytime you clone your project after it's initial creation, you must run the following commands in the project's root folder: 
