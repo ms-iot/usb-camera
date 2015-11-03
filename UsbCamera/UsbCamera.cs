@@ -62,10 +62,12 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
                 catch (UnauthorizedAccessException ex)
                 {
                     Debug.WriteLine("UsbCamera: UnauthorizedAccessException: " + ex.ToString() + "Ensure webcam capability is added in the manifest.");
+                    throw;
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine("UsbCamera: Exception when initializing MediaCapture:" + ex.ToString());
+                    throw;
                 }
             }
             return false;
@@ -85,9 +87,8 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
             }
             catch
             {
-                isInitialized = false;
                 Debug.WriteLine("UsbCamera: Failed to start camera preview stream");
-
+                throw;
             }
         }
 
@@ -142,6 +143,7 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
             catch
             {
                 Debug.WriteLine("UsbCamera: Failed to stop camera preview stream");
+                throw;
             }
         }
 
