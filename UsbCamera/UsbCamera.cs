@@ -34,7 +34,7 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
         /// <returns>
         /// Task object: True if camera is successfully initialized; false otherwise.
         /// </returns>
-        public async Task<bool> InitializeCameraAsync()
+        public async Task<bool> InitializeAsync()
         {
             if (mediaCapture == null)
             {
