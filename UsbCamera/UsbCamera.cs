@@ -23,7 +23,7 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
         /// <summary>
         /// Gets the MediaCapture object for the USB camera 
         /// </summary>
-        public MediaCapture getMediaCapture
+        public MediaCapture MediaCaptureInstance
         {
             get { return mediaCapture; }
         }
@@ -167,18 +167,7 @@ namespace Microsoft.Maker.Devices.Media.UsbCamera
         {
             // Get available devices for capturing pictures
             var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
-
-
-            if (allVideoDevices.Count > 0)
-            {
-                // If there is a device attached, return the first device found
-                return allVideoDevices[0];
-            }
-            else
-            {
-                // Else, return null
-                return null;
-            }
+            return allVideoDevices.Count > 0 ? allVideoDevices[0] : null;
         }
 
         /// <summary>
