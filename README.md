@@ -21,3 +21,7 @@ To use this block in your project, you need to perform the following steps:
 Note: Everytime you clone your project after it's initial creation, you must run the following commands in the project's root folder: 
 - `git submodule init`
 - `git submodule update`
+
+***
+
+This project has adopted the [Microsoft Open Source Code of Conduct](http://microsoft.github.io/codeofconduct). For more information see the [Code of Conduct FAQ](http://microsoft.github.io/codeofconduct/faq.md) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
