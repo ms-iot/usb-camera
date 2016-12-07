@@ -8,7 +8,7 @@ using Windows.Storage;
 
 namespace Microsoft.Maker.Devices.Media.UsbCamera
 {
-    public class UsbCamera
+    public class UsbCamera: IDisposable
     {
         /// <summary>
         /// Media Capture object for the USB camera
